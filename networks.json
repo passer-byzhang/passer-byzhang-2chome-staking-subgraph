@@ -1,0 +1,8 @@
+{
+  "neox-testnet": {
+    "NicStakingV2": {
+      "address": "0x727fa532D05e241D3548917716fD26a1E3C42fe1",
+      "startBlock": 1222
+    }
+  }
+}

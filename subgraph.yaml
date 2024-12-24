@@ -1,0 +1,59 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: NicStakingV2
+    network: neox-testnet
+    source:
+      address: "0x727fa532D05e241D3548917716fD26a1E3C42fe1"
+      abi: NicStakingV2
+      startBlock: 1222
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CreateNToken
+        - Initialized
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+        - SetStakableToken
+        - SetUnStakable
+        - Staked
+        - StartStage
+        - Unstaked
+        - Upgraded
+        - Withdraw
+      abis:
+        - name: NicStakingV2
+          file: ./abis/NicStakingV2.json
+      eventHandlers:
+        - event: CreateNToken(indexed address,indexed address)
+          handler: handleCreateNToken
+        - event: Initialized(uint64)
+          handler: handleInitialized
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: SetStakableToken(indexed address,bool)
+          handler: handleSetStakableToken
+        - event: SetUnStakable(indexed address,bool)
+          handler: handleSetUnStakable
+        - event: Staked(indexed address,indexed address,uint256,uint256)
+          handler: handleStaked
+        - event: StartStage(indexed uint256,uint256,uint256)
+          handler: handleStartStage
+        - event: Unstaked(indexed address,indexed address,uint256,uint256)
+          handler: handleUnstaked
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+        - event: Withdraw(indexed address,uint256,indexed address,address,uint256)
+          handler: handleWithdraw
+      file: ./src/nic-staking-v-2.ts
