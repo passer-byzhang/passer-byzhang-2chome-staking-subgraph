@@ -7,11 +7,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: NicStakingV2
-    network: neox
+    network: neox-testnet
     source:
-      address: "0x88bE0C885F56C55B1e8E852c9e1a2101C0E9Cd99"
+      address: "0x78870BcE2FE81171BCf2Fa34060A399d1f0B6Eb5"
       abi: NicStakingV2
-      startBlock: 1036045
+      startBlock: 1227579
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

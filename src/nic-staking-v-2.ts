@@ -24,8 +24,13 @@ import {
   StartStage,
   Unstaked,
   Upgraded,
-  Withdraw
+  Withdraw,
+  EntitiesCount,
+  EventCount,
+  StakeAmount
 } from "../generated/schema"
+import {Bytes,BigInt, ethereum} from '@graphprotocol/graph-ts'
+import {EPOCHTIME} from "./config"
 
 export function handleCreateNToken(event: CreateNTokenEvent): void {
   let entity = new CreateNToken(
@@ -141,6 +146,11 @@ export function handleStaked(event: StakedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+  const stakeCount = updateEntitiesCount("staked")
+  const unstakedCount = getEntitiesCount("unstaked")
+  updateEventCount(event,event.block.timestamp,stakeCount,unstakedCount)
+  updateStakeAmount(event,event.params.staker,event.params.token,event.params.amount,true)
+
 }
 
 export function handleStartStage(event: StartStageEvent): void {
@@ -150,7 +160,8 @@ export function handleStartStage(event: StartStageEvent): void {
   entity.stageIndex = event.params.stageIndex
   entity.startTime = event.params.startTime
   entity.endTime = event.params.endTime
-
+  entity.startEpoch =  event.params.startTime.div(EPOCHTIME)
+  entity.endEpoch = event.params.endTime.div(EPOCHTIME)
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -172,6 +183,11 @@ export function handleUnstaked(event: UnstakedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+  const unstakedCount = updateEntitiesCount("unstaked")
+  const stakedCount = getEntitiesCount("staked")
+  updateEventCount(event,event.block.timestamp,stakedCount,unstakedCount)
+  updateStakeAmount(event,event.params.staker,event.params.token,event.params.amount,false)
+
 }
 
 export function handleUpgraded(event: UpgradedEvent): void {
@@ -202,4 +218,67 @@ export function handleWithdraw(event: WithdrawEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+}
+
+function updateEntitiesCount(name: string): BigInt {
+  let id = Bytes.fromUTF8(name)
+  let entity = EntitiesCount.load(id)
+
+  if (entity == null) {
+    entity = new EntitiesCount(id)
+    entity.name = name
+    entity.amount = BigInt.fromI32(1)
+  }else{
+    entity.amount = entity.amount.plus(BigInt.fromI32(1))
+  }
+  entity.save()
+  return entity.amount
+}
+
+function getEntitiesCount(name: string): BigInt {
+  let id = Bytes.fromUTF8(name)
+  let entity = EntitiesCount.load(id)
+  if (entity == null) {
+    return BigInt.fromI32(0)
+  } else {
+    return entity.amount
+  }
+}
+
+
+
+
+// Function to update the EventCount entity
+function updateEventCount(event:ethereum.Event,timestamp: BigInt, stakedCount:BigInt,unstakeCount:BigInt): void {
+  let eventCount = new EventCount(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  eventCount.stakeCount= stakedCount
+  eventCount.unstakeCount = unstakeCount
+  eventCount.timestamp = timestamp
+  eventCount.save()
+}
+
+function updateStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:BigInt,isStake:bool):void{
+  let id = Bytes.fromHexString(staker.toHexString().concat(token.toHexString()))
+  let entity = StakeAmount.load(id)
+  if(entity == null){
+    entity = new StakeAmount(id)
+    entity.staker = staker
+    entity.token = token
+    entity.amount = BigInt.fromI32(0)
+
+    entity.transactionHash = event.transaction.hash
+    entity.blockNumber = event.block.number
+    entity.blockTimestamp = event.block.timestamp
+  }
+  else{
+    if(isStake){
+      entity.amount = entity.amount.plus(amount)
+    }else{
+      entity.amount = entity.amount.minus(amount)
+    }
+  }
+  entity.save()
+
 }

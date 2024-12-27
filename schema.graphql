@@ -79,6 +79,8 @@ type StartStage @entity(immutable: true) {
   stageIndex: BigInt! # uint256
   startTime: BigInt! # uint256
   endTime: BigInt! # uint256
+  startEpoch: BigInt! # uint256
+  endEpoch: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -114,3 +116,28 @@ type Withdraw @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type EntitiesCount @entity(immutable: false) {
+  id: Bytes!
+  name: String! # address
+  amount: BigInt! # uint256
+}
+
+
+type EventCount @entity {
+  id: Bytes!
+  timestamp: BigInt!
+  stakeCount: BigInt!
+  unstakeCount: BigInt!
+}
+
+type StakeAmount @entity {
+  id: Bytes!
+  staker: Bytes!
+  token: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
