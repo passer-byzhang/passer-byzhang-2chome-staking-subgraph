@@ -10,7 +10,8 @@ import {
   StartStage as StartStageEvent,
   Unstaked as UnstakedEvent,
   Upgraded as UpgradedEvent,
-  Withdraw as WithdrawEvent
+  Withdraw as WithdrawEvent,
+  NicStakingV2
 } from "../generated/NicStakingV2/NicStakingV2"
 import {
   CreateNToken,
@@ -139,7 +140,15 @@ export function handleStaked(event: StakedEvent): void {
   entity.staker = event.params.staker
   entity.token = event.params.token
   entity.amount = event.params.amount
-  entity.epoch = event.params.epoch
+  let contract = NicStakingV2.bind(event.address)
+  entity.stage = event.params.stage
+  const startTime = contract.stages(event.params.stage).value0
+  if(startTime==BigInt.fromI32(0)||event.block.timestamp<startTime){
+    entity.epoch = BigInt.fromI32(0)
+  }else{
+    entity.epoch = event.block.timestamp.minus(startTime).div(EPOCHTIME).plus(BigInt.fromI32(1))
+  }
+  //call the contract's method stages
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -160,11 +169,13 @@ export function handleStartStage(event: StartStageEvent): void {
   entity.stageIndex = event.params.stageIndex
   entity.startTime = event.params.startTime
   entity.endTime = event.params.endTime
-  entity.startEpoch =  event.params.startTime.div(EPOCHTIME)
-  entity.endEpoch = event.params.endTime.div(EPOCHTIME)
+
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
+
+  entity.startEpoch =  BigInt.fromI32(1)
+  entity.endEpoch = event.params.endTime.minus(event.params.startTime).div(EPOCHTIME).plus(BigInt.fromI32(1))
 
   entity.save()
 }
@@ -176,7 +187,6 @@ export function handleUnstaked(event: UnstakedEvent): void {
   entity.staker = event.params.staker
   entity.token = event.params.token
   entity.amount = event.params.amount
-  entity.epoch = event.params.epoch
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -280,5 +290,4 @@ function updateStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:
     }
   }
   entity.save()
-
 }
