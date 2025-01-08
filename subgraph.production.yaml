@@ -9,9 +9,9 @@ dataSources:
     name: NicStakingV2
     network: neox
     source:
-      address: "0xc183F7f6934170177928AE2F420B912a348308c9"
+      address: "0x08f464EF8ded81FBC90554c436364436173041DD"
       abi: NicStakingV2
-      startBlock: 1196505
+      startBlock: 1101955
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -48,9 +48,9 @@ dataSources:
         - event: SetUnStakable(indexed address,bool)
           handler: handleSetUnStakable
         - event: Staked(indexed address,indexed address,uint256,uint256)
-          handler: handleStakedMainnet
+          handler: handleStakedProduction
         - event: StartStage(indexed uint256,uint256,uint256)
-          handler: handleStartStageMainnet
+          handler: handleStartStageProduction
         - event: Unstaked(indexed address,indexed address,uint256)
           handler: handleUnstaked
         - event: Upgraded(indexed address)

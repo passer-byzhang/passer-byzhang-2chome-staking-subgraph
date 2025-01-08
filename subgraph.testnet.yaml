@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-description: Subgraph for NicStakingV2 ,update nad update and update
+description: Subgraph for NicStakingV2,fuck you all
 indexerHints:
   prune: auto
 schema:
@@ -9,9 +9,9 @@ dataSources:
     name: NicStakingV2
     network: neox-testnet
     source:
-      address: "0xB3912f8048A36310612C408f7Fa7ADe553cE1328"
+      address: "0xa95415651C914a8f7D4163e553888c0D1daa3cA6"
       abi: NicStakingV2
-      startBlock: 1246759
+      startBlock: 1266184
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -48,9 +48,9 @@ dataSources:
         - event: SetUnStakable(indexed address,bool)
           handler: handleSetUnStakable
         - event: Staked(indexed address,indexed address,uint256,uint256)
-          handler: handleStaked
+          handler: handleStakedTestnet
         - event: StartStage(indexed uint256,uint256,uint256)
-          handler: handleStartStage
+          handler: handleStartStageTestnet
         - event: Unstaked(indexed address,indexed address,uint256)
           handler: handleUnstaked
         - event: Upgraded(indexed address)

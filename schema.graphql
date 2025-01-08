@@ -82,6 +82,7 @@ type StartStage @entity(immutable: true) {
   endTime: BigInt! # uint256
   startEpoch: BigInt! # uint256
   endEpoch: BigInt! # uint256
+  stage: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -140,4 +141,3 @@ type StakeAmount @entity {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
-

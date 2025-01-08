@@ -31,7 +31,7 @@ import {
   StakeAmount
 } from "../generated/schema"
 import {Bytes,BigInt, ethereum} from '@graphprotocol/graph-ts'
-import {EPOCHTIME} from "./config"
+import {EPOCHTIME_MAINNET,EPOCHTIME_PRODUCTION,EPOCHTIME_TESTNET} from "./config"
 
 export function handleCreateNToken(event: CreateNTokenEvent): void {
   let entity = new CreateNToken(
@@ -133,7 +133,7 @@ export function handleSetUnStakable(event: SetUnStakableEvent): void {
   entity.save()
 }
 
-export function handleStaked(event: StakedEvent): void {
+export function handleStakedTestnet(event: StakedEvent): void {
   let entity = new Staked(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
@@ -146,7 +146,7 @@ export function handleStaked(event: StakedEvent): void {
   if(startTime==BigInt.fromI32(0)||event.block.timestamp<startTime){
     entity.epoch = BigInt.fromI32(0)
   }else{
-    entity.epoch = event.block.timestamp.minus(startTime).div(EPOCHTIME).plus(BigInt.fromI32(1))
+    entity.epoch = event.block.timestamp.minus(startTime).div(EPOCHTIME_TESTNET).plus(BigInt.fromI32(1))
   }
   //call the contract's method stages
 
@@ -158,11 +158,68 @@ export function handleStaked(event: StakedEvent): void {
   const stakeCount = updateEntitiesCount("staked")
   const unstakedCount = getEntitiesCount("unstaked")
   updateEventCount(event,event.block.timestamp,stakeCount,unstakedCount)
-  updateStakeAmount(event,event.params.staker,event.params.token,event.params.amount,true)
-
+  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount)
 }
 
-export function handleStartStage(event: StartStageEvent): void {
+export function handleStakedMainnet(event: StakedEvent): void {
+  let entity = new Staked(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.staker = event.params.staker
+  entity.token = event.params.token
+  entity.amount = event.params.amount
+  let contract = NicStakingV2.bind(event.address)
+  entity.stage = event.params.stage
+  const startTime = contract.stages(event.params.stage).value0
+  if(startTime==BigInt.fromI32(0)||event.block.timestamp<startTime){
+    entity.epoch = BigInt.fromI32(0)
+  }else{
+    entity.epoch = event.block.timestamp.minus(startTime).div(EPOCHTIME_MAINNET).plus(BigInt.fromI32(1))
+  }
+  //call the contract's method stages
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+  const stakeCount = updateEntitiesCount("staked")
+  const unstakedCount = getEntitiesCount("unstaked")
+  updateEventCount(event,event.block.timestamp,stakeCount,unstakedCount)
+  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount)
+}
+
+
+export function handleStakedProduction(event: StakedEvent): void {
+  let entity = new Staked(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.staker = event.params.staker
+  entity.token = event.params.token
+  entity.amount = event.params.amount
+  let contract = NicStakingV2.bind(event.address)
+  entity.stage = event.params.stage
+  const startTime = contract.stages(event.params.stage).value0
+  if(startTime==BigInt.fromI32(0)||event.block.timestamp<startTime){
+    entity.epoch = BigInt.fromI32(0)
+  }else{
+    entity.epoch = event.block.timestamp.minus(startTime).div(EPOCHTIME_PRODUCTION).plus(BigInt.fromI32(1))
+  }
+  //call the contract's method stages
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+  const stakeCount = updateEntitiesCount("staked")
+  const unstakedCount = getEntitiesCount("unstaked")
+  updateEventCount(event,event.block.timestamp,stakeCount,unstakedCount)
+  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount)
+}
+
+
+export function handleStartStageTestnet(event: StartStageEvent): void {
   let entity = new StartStage(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
@@ -173,12 +230,60 @@ export function handleStartStage(event: StartStageEvent): void {
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
+  entity.stage = event.params.stageIndex
+  entity.stageIndex = event.params.stageIndex
 
   entity.startEpoch =  BigInt.fromI32(1)
-  entity.endEpoch = event.params.endTime.minus(event.params.startTime).div(EPOCHTIME).plus(BigInt.fromI32(1))
+  entity.endEpoch = event.params.endTime.minus(event.params.startTime).div(EPOCHTIME_TESTNET).plus(BigInt.fromI32(1))
 
   entity.save()
 }
+
+
+export function handleStartStageMainnet(event: StartStageEvent): void {
+  let entity = new StartStage(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.stageIndex = event.params.stageIndex
+  entity.startTime = event.params.startTime
+  entity.endTime = event.params.endTime
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+  entity.stage = event.params.stageIndex
+  entity.stageIndex = event.params.stageIndex
+
+  entity.startEpoch =  BigInt.fromI32(1)
+  entity.endEpoch = event.params.endTime.minus(event.params.startTime).div(EPOCHTIME_MAINNET).plus(BigInt.fromI32(1))
+
+  entity.save()
+}
+
+export function handleStartStageProduction(event: StartStageEvent): void {
+  let entity = new StartStage(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.stageIndex = event.params.stageIndex
+  entity.startTime = event.params.startTime
+  entity.endTime = event.params.endTime
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+  entity.stage = event.params.stageIndex
+  entity.stageIndex = event.params.stageIndex
+
+  entity.startEpoch =  BigInt.fromI32(1)
+  entity.endEpoch = event.params.endTime.minus(event.params.startTime).div(EPOCHTIME_PRODUCTION).plus(BigInt.fromI32(1))
+
+  entity.save()
+}
+
+
+
+
+
 
 export function handleUnstaked(event: UnstakedEvent): void {
   let entity = new Unstaked(
@@ -196,7 +301,6 @@ export function handleUnstaked(event: UnstakedEvent): void {
   const unstakedCount = updateEntitiesCount("unstaked")
   const stakedCount = getEntitiesCount("staked")
   updateEventCount(event,event.block.timestamp,stakedCount,unstakedCount)
-  updateStakeAmount(event,event.params.staker,event.params.token,event.params.amount,false)
 
 }
 
@@ -269,7 +373,7 @@ function updateEventCount(event:ethereum.Event,timestamp: BigInt, stakedCount:Bi
   eventCount.save()
 }
 
-function updateStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:BigInt,isStake:bool):void{
+function addStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:BigInt):void{
   let id = Bytes.fromHexString(staker.toHexString().concat(token.toHexString()))
   let entity = StakeAmount.load(id)
   if(entity == null){
@@ -283,11 +387,7 @@ function updateStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:
     entity.blockTimestamp = event.block.timestamp
   }
   else{
-    if(isStake){
       entity.amount = entity.amount.plus(amount)
-    }else{
-      entity.amount = entity.amount.minus(amount)
-    }
   }
   entity.save()
 }
