@@ -374,7 +374,7 @@ function updateEventCount(event:ethereum.Event,timestamp: BigInt, stakedCount:Bi
 }
 
 function addStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:BigInt,stage:BigInt):void{
-  let id = Bytes.fromHexString(staker.toHexString().concat(token.toHexString()))
+  let id = Bytes.fromHexString(staker.toHexString().concat(token.toHexString()).concat(stage.toHexString()))
   let entity = StakeAmount.load(id)
   if(entity == null){
     entity = new StakeAmount(id)
