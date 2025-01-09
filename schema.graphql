@@ -137,6 +137,7 @@ type StakeAmount @entity {
   staker: Bytes!
   token: Bytes!
   amount: BigInt!
+  stage: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

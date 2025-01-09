@@ -158,7 +158,7 @@ export function handleStakedTestnet(event: StakedEvent): void {
   const stakeCount = updateEntitiesCount("staked")
   const unstakedCount = getEntitiesCount("unstaked")
   updateEventCount(event,event.block.timestamp,stakeCount,unstakedCount)
-  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount)
+  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount,event.params.stage)
 }
 
 export function handleStakedMainnet(event: StakedEvent): void {
@@ -186,7 +186,7 @@ export function handleStakedMainnet(event: StakedEvent): void {
   const stakeCount = updateEntitiesCount("staked")
   const unstakedCount = getEntitiesCount("unstaked")
   updateEventCount(event,event.block.timestamp,stakeCount,unstakedCount)
-  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount)
+  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount,event.params.stage)
 }
 
 
@@ -215,7 +215,7 @@ export function handleStakedProduction(event: StakedEvent): void {
   const stakeCount = updateEntitiesCount("staked")
   const unstakedCount = getEntitiesCount("unstaked")
   updateEventCount(event,event.block.timestamp,stakeCount,unstakedCount)
-  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount)
+  addStakeAmount(event,event.params.staker,event.params.token,event.params.amount,event.params.stage)
 }
 
 
@@ -373,7 +373,7 @@ function updateEventCount(event:ethereum.Event,timestamp: BigInt, stakedCount:Bi
   eventCount.save()
 }
 
-function addStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:BigInt):void{
+function addStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:BigInt,stage:BigInt):void{
   let id = Bytes.fromHexString(staker.toHexString().concat(token.toHexString()))
   let entity = StakeAmount.load(id)
   if(entity == null){
@@ -381,7 +381,7 @@ function addStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:Big
     entity.staker = staker
     entity.token = token
     entity.amount = BigInt.fromI32(0)
-
+    entity.stage = stage
     entity.transactionHash = event.transaction.hash
     entity.blockNumber = event.block.number
     entity.blockTimestamp = event.block.timestamp
