@@ -382,7 +382,7 @@ function addStakeAmount(event:ethereum.Event,staker:Bytes,token:Bytes,amount:Big
     entity = new StakeAmount(id)
     entity.staker = staker
     entity.token = token
-    entity.amount = BigInt.fromI32(0)
+    entity.amount = amount
     entity.stage = stage
     entity.transactionHash = event.transaction.hash
     entity.blockNumber = event.block.number
